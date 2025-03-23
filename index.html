@@ -26,13 +26,22 @@
 
         #options-container {
             display: flex;
-            flex-direction: column;
-            align-items: center;
+            flex-wrap: wrap; /* 允许换行 */
+            justify-content: center;
+            max-width: 400px; /* 限制宽度，确保每行两个选项 */
+        }
+
+        .option-row {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 10px; /* 行间距 */
         }
 
         input[type="text"] {
             padding: 10px;
             margin: 5px;
+            width: 180px; /* 固定宽度，确保每行两个选项 */
         }
 
         button {
@@ -75,8 +84,14 @@
         <div id="options-container">
             <!-- 动态生成的输入框会放在这里 -->
         </div>
-        <button onclick="addOption()">增加选项</button>
-        <button onclick="setupWheel()">设置/重置转盘</button>
+        <div>
+            <button onclick="addOption()">增加选项</button>
+            <button onclick="removeOption()">减少选项</button>
+        </div>
+        <div>
+            <button onclick="setupWheel()">设置转盘</button>
+            <button onclick="resetWheel()">重置转盘</button>
+        </div>
         <button onclick="spinWheel()">开始转动</button>
     </div>
     <div id="wheel">
@@ -92,10 +107,32 @@
 
         // 动态增加选项输入框
         function addOption() {
+            const inputs = optionsContainer.querySelectorAll('input');
+            if (inputs.length % 2 === 0) {
+                // 每两个选项换一行
+                const row = document.createElement('div');
+                row.className = 'option-row';
+                optionsContainer.appendChild(row);
+            }
             const input = document.createElement('input');
             input.type = 'text';
-            input.placeholder = `输入选项 ${optionsContainer.children.length + 1}`;
-            optionsContainer.appendChild(input);
+            input.placeholder = `输入选项 ${inputs.length + 1}`;
+            optionsContainer.lastElementChild.appendChild(input);
+        }
+
+        // 动态减少选项输入框
+        function removeOption() {
+            const rows = optionsContainer.querySelectorAll('.option-row');
+            if (rows.length === 0) return; // 没有选项时直接返回
+
+            const lastRow = rows[rows.length - 1];
+            const inputs = lastRow.querySelectorAll('input');
+            if (inputs.length > 0) {
+                lastRow.removeChild(inputs[inputs.length - 1]); // 删除最后一个输入框
+            }
+            if (inputs.length === 1) {
+                optionsContainer.removeChild(lastRow); // 如果行内没有输入框，删除整行
+            }
         }
 
         // 设置转盘
@@ -136,6 +173,7 @@
                 text.setAttribute('text-anchor', 'middle');
                 text.setAttribute('dominant-baseline', 'middle');
                 text.setAttribute('fill', 'white');
+                text.setAttribute('font-size', calculateFontSize(options[i].length)); // 动态调整字体大小
                 text.textContent = options[i];
                 wheelSvg.appendChild(text);
             }
@@ -143,6 +181,23 @@
             lastAngle = 0;
             wheelSvg.style.transition = 'none'; // 禁用过渡效果
             wheelSvg.style.transform = 'rotate(0deg)';
+        }
+
+        // 重置转盘
+        function resetWheel() {
+            // 清空所有选项输入框
+            const inputs = optionsContainer.querySelectorAll('input');
+            inputs.forEach(input => (input.value = ''));
+            // 清空转盘
+            wheelSvg.innerHTML = '';
+            wheelSvg.style.transform = 'rotate(0deg)';
+        }
+
+        // 动态计算字体大小
+        function calculateFontSize(textLength) {
+            if (textLength <= 5) return '10px';
+            if (textLength <= 10) return '8px';
+            return '6px'; // 更长的文本使用更小的字体
         }
 
         // 旋转转盘
