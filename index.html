@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>dice</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+
+        #input-container {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            margin: 5px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        #wheel {
+            width: 300px;
+            height: 300px;
+            position: relative;
+        }
+
+        #wheel svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        #pointer {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 20px solid red;
+            z-index: 10;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="input-container">
+        <input type="text" id="option1" placeholder="输入选项 1">
+        <input type="text" id="option2" placeholder="输入选项 2">
+        <input type="text" id="option3" placeholder="输入选项 3">
+        <button onclick="setupWheel()">设置/重置转盘</button>
+        <button onclick="spinWheel()">开始转动</button>
+    </div>
+    <div id="wheel">
+        <svg viewBox="0 0 100 100" id="wheel-svg"></svg>
+        <div id="pointer"></div>
+    </div>
+
+    <script>
+        const wheelSvg = document.getElementById('wheel-svg');
+        const resultElement = document.getElementById('result');
+        const colors = ['#FF5733', '#33FF57', '#5733FF'];
+        let lastAngle = 0;
+
+        function setupWheel() {
+            wheelSvg.innerHTML = '';
+            const options = [];
+            for (let i = 1; i <= 3; i++) {
+                const option = document.getElementById(`option${i}`).value;
+                if (option) {
+                    options.push(option);
+                }
+            }
+            if (options.length < 3) {
+                alert('请输入三个选项');
+                return;
+            }
+            const angle = 360 / options.length;
+            for (let i = 0; i < options.length; i++) {
+                const startAngle = i * angle;
+                const endAngle = (i + 1) * angle;
+                const startX = 50 + 40 * Math.cos((startAngle - 90) * (Math.PI / 180));
+                const startY = 50 + 40 * Math.sin((startAngle - 90) * (Math.PI / 180));
+                const endX = 50 + 40 * Math.cos((endAngle - 90) * (Math.PI / 180));
+                const endY = 50 + 40 * Math.sin((endAngle - 90) * (Math.PI / 180));
+                const largeArcFlag = endAngle - startAngle > 180? 1 : 0;
+                const pathData = `M 50 50 L ${startX} ${startY} A 40 40 0 ${largeArcFlag} 1 ${endX} ${endY} Z`;
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', pathData);
+                path.setAttribute('fill', colors[i % colors.length]);
+                wheelSvg.appendChild(path);
+
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                const textAngle = startAngle + angle / 2;
+                const textX = 50 + 25 * Math.cos((textAngle - 90) * (Math.PI / 180));
+                const textY = 50 + 25 * Math.sin((textAngle - 90) * (Math.PI / 180));
+                text.setAttribute('x', textX);
+                text.setAttribute('y', textY);
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('dominant-baseline', 'middle');
+                text.setAttribute('fill', 'white');
+                text.textContent = options[i];
+                wheelSvg.appendChild(text);
+            }
+            lastAngle = 0;
+            wheelSvg.style.transform = 'rotate(0deg)';
+        }
+
+        function spinWheel() {
+            const paths = wheelSvg.querySelectorAll('path');
+            if (paths.length === 0) {
+                alert('请先设置转盘');
+                return;
+            }
+            const randomSeed = new Date().getTime();
+            const randomAdditionalAngle = Math.floor((randomSeed % 360) + Math.random() * 360) + 1080;
+            const newAngle = lastAngle + randomAdditionalAngle;
+            wheelSvg.style.transition = 'transform 5s ease-out';
+            wheelSvg.style.transform = `rotate(${newAngle}deg)`;
+            lastAngle = newAngle;
+            setTimeout(() => {
+                const finalAngle = newAngle % 360;
+                const segmentIndex = Math.floor(finalAngle / (360 / paths.length));
+                const texts = wheelSvg.querySelectorAll('text');
+                wheelSvg.style.transition = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+
+</html>
