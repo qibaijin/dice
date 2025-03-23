@@ -68,6 +68,21 @@
             margin: 5px;
             width: 100%; /* 按钮宽度占满容器 */
             max-width: 300px; /* 限制按钮最大宽度 */
+            font-size: 16px; /* 统一字体大小 */
+            border-radius: 5px; /* 圆角 */
+        }
+
+        #spin-button {
+            background-color: #FF0000; /* 红色 */
+            border-radius: 25px; /* 椭圆形 */
+            font-weight: bold; /* 加粗字体 */
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
         }
 
         #wheel {
@@ -102,15 +117,17 @@
         <div id="options-container">
             <!-- 动态生成的输入框会放在这里 -->
         </div>
-        <div>
+        <div class="button-group">
             <button onclick="addOption()">增加选项</button>
             <button onclick="removeOption()">减少选项</button>
         </div>
-        <div>
+        <div class="button-group">
             <button onclick="setupWheel()">设置转盘</button>
             <button onclick="resetWheel()">重置转盘</button>
         </div>
-        <button onclick="spinWheel()">开始转动</button>
+        <div class="button-group">
+            <button id="spin-button" onclick="spinWheel()">开始转动</button>
+        </div>
     </div>
     <div id="wheel">
         <svg viewBox="0 0 100 100" id="wheel-svg"></svg>
