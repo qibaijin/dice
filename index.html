@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我们的自定义转盘</title>
+    <title>秋宝的选择转盘</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -16,6 +16,16 @@
             margin: 0;
             background-color: #f4f4f4;
             overflow-y: auto;
+        }
+
+        /* 标题样式 */
+        #title {
+            font-size: 36px;
+            font-weight: bold;
+            color: #333;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            margin: 20px 0;
+            text-align: center;
         }
 
         #input-container {
@@ -89,8 +99,8 @@
         }
 
         #wheel {
-            width: 250px;
-            height: 250px;
+            width: 300px;
+            height: 300px;
             position: relative;
         }
 
@@ -127,6 +137,10 @@
         }
 
         @media (max-width: 480px) {
+            #title {
+                font-size: 28px; /* 小屏幕下标题字体缩小 */
+            }
+
             #wheel {
                 width: 200px;
                 height: 200px;
@@ -149,6 +163,9 @@
 </head>
 
 <body>
+    <!-- 标题 -->
+    <h1 id="title">木木木木木转盘</h1>
+
     <div id="input-container">
         <div id="options-container">
             <!-- 动态生成的输入框会放在这里 -->
