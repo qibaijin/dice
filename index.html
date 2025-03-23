@@ -11,11 +11,11 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start; /* 顶部对齐 */
+            justify-content: flex-start;
             min-height: 100vh;
             margin: 0;
             background-color: #f4f4f4;
-            overflow-y: auto; /* 允许页面垂直滚动 */
+            overflow-y: auto;
         }
 
         #input-container {
@@ -24,12 +24,12 @@
             flex-direction: column;
             align-items: center;
             width: 100%;
-            max-width: 300px; /* 限制宽度，适应手机屏幕 */
+            max-width: 300px;
         }
 
         #options-container {
             display: flex;
-            flex-wrap: wrap; /* 允许换行 */
+            flex-wrap: wrap;
             justify-content: center;
             width: 100%;
         }
@@ -38,13 +38,13 @@
             display: flex;
             justify-content: space-between;
             width: 100%;
-            margin-bottom: 10px; /* 行间距 */
+            margin-bottom: 10px;
         }
 
         .option-item {
             display: flex;
             align-items: center;
-            width: 48%; /* 每行两个选项，留出间距 */
+            width: 48%;
         }
 
         .option-label {
@@ -55,42 +55,43 @@
         input[type="text"] {
             padding: 8px;
             margin: 5px 0;
-            width: 100%; /* 输入框占满剩余空间 */
+            width: 100%;
             box-sizing: border-box;
+            font-size: 14px;
         }
 
-        button {
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 2列 */
+            grid-template-rows: repeat(2, auto); /* 2行 */
+            gap: 10px; /* 按钮之间的间距 */
+            width: 100%;
+            max-width: 300px;
+            margin-bottom: 10px;
+        }
+
+        .button-grid button {
             padding: 10px 20px;
             background-color: #007BFF;
             color: white;
             border: none;
             cursor: pointer;
-            margin: 5px;
-            width: 100%; /* 按钮宽度占满容器 */
-            max-width: 300px; /* 限制按钮最大宽度 */
-            font-size: 16px; /* 统一字体大小 */
-            border-radius: 5px; /* 圆角 */
+            font-size: 16px;
+            border-radius: 5px;
+            width: 100%; /* 按钮占满网格单元格 */
         }
 
-        #spin-button {
-            background-color: #FF0000; /* 红色 */
-            border-radius: 25px; /* 椭圆形 */
-            font-weight: bold; /* 加粗字体 */
-            bottom: 3px;
-        }
-
-        .button-group {
+        #wheel-container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            width: 100%;
+            margin-top: 20px; /* 调整转盘与按钮的间距 */
         }
 
         #wheel {
-            width: 300px;
-            height: 300px;
+            width: 250px;
+            height: 250px;
             position: relative;
-            margin: 3px 0; /* 上下留出间距 */
         }
 
         #wheel svg {
@@ -100,7 +101,7 @@
 
         #pointer {
             position: absolute;
-            top: -3px;
+            top: -20px; /* 调整指针位置 */
             left: 50%;
             transform: translateX(-50%);
             width: 0;
@@ -110,6 +111,40 @@
             border-top: 20px solid red;
             z-index: 10;
         }
+
+        #spin-button {
+            background-color: #007BFF;
+            border-radius: 25px;
+            font-weight: bold;
+            width: 100%;
+            max-width: 300px;
+            margin-top: 20px; /* 调整按钮与转盘的间距 */
+            padding: 15px 20px;
+            font-size: 18px;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        @media (max-width: 480px) {
+            #wheel {
+                width: 200px;
+                height: 200px;
+            }
+
+            input[type="text"] {
+                font-size: 12px;
+            }
+
+            .button-grid button {
+                font-size: 14px;
+            }
+
+            #spin-button {
+                font-size: 16px;
+                padding: 12px 20px;
+            }
+        }
     </style>
 </head>
 
@@ -118,34 +153,33 @@
         <div id="options-container">
             <!-- 动态生成的输入框会放在这里 -->
         </div>
-        <div class="button-group">
+        <div class="button-grid">
             <button onclick="addOption()">增加选项</button>
             <button onclick="removeOption()">减少选项</button>
-        </div>
-        <div class="button-group">
             <button onclick="setupWheel()">设置转盘</button>
             <button onclick="resetWheel()">重置转盘</button>
         </div>
-        <div class="button-group">
-            <button id="spin-button" onclick="spinWheel()">开始转动</button>
-        </div>
     </div>
-    <div id="wheel">
-        <svg viewBox="0 0 100 100" id="wheel-svg"></svg>
-        <div id="pointer"></div>
+    <div id="wheel-container">
+        <div id="wheel">
+            <svg viewBox="0 0 100 100" id="wheel-svg">
+                <!-- 默认显示一个完整的红色圆形 -->
+                <circle cx="50" cy="50" r="40" fill="red" />
+            </svg>
+            <div id="pointer"></div>
+        </div>
+        <button id="spin-button" onclick="spinWheel()">开始转动</button>
     </div>
 
     <script>
         const wheelSvg = document.getElementById('wheel-svg');
         const optionsContainer = document.getElementById('options-container');
-        const colors = ['#FF5733', '#33FF57', '#5733FF', '#33A1FF', '#FF33A1', '#A1FF33']; // 更多颜色
+        const colors = ['#FF5733', '#33FF57', '#5733FF', '#33A1FF', '#FF33A1', '#A1FF33'];
         let lastAngle = 0;
 
-        // 动态增加选项输入框
         function addOption() {
             const inputs = optionsContainer.querySelectorAll('input');
             if (inputs.length % 2 === 0) {
-                // 每两个选项换一行
                 const row = document.createElement('div');
                 row.className = 'option-row';
                 optionsContainer.appendChild(row);
@@ -160,24 +194,22 @@
             optionsContainer.lastElementChild.appendChild(optionItem);
         }
 
-        // 动态减少选项输入框
         function removeOption() {
             const rows = optionsContainer.querySelectorAll('.option-row');
-            if (rows.length === 0) return; // 没有选项时直接返回
+            if (rows.length === 0) return;
 
             const lastRow = rows[rows.length - 1];
             const optionItems = lastRow.querySelectorAll('.option-item');
             if (optionItems.length > 0) {
-                lastRow.removeChild(optionItems[optionItems.length - 1]); // 删除最后一个选项
+                lastRow.removeChild(optionItems[optionItems.length - 1]);
             }
             if (optionItems.length === 1) {
-                optionsContainer.removeChild(lastRow); // 如果行内没有选项，删除整行
+                optionsContainer.removeChild(lastRow);
             }
         }
 
-        // 设置转盘
         function setupWheel() {
-            wheelSvg.innerHTML = '';
+            wheelSvg.innerHTML = ''; // 清空默认的红色圆形
             const inputs = optionsContainer.querySelectorAll('input');
             const options = [];
             inputs.forEach((input, index) => {
@@ -187,6 +219,8 @@
             });
             if (options.length < 2) {
                 alert('请输入至少两个选项');
+                // 如果没有足够的选项，恢复默认的红色圆形
+                wheelSvg.innerHTML = '<circle cx="50" cy="50" r="40" fill="red" />';
                 return;
             }
             const angle = 360 / options.length;
@@ -213,49 +247,41 @@
                 text.setAttribute('text-anchor', 'middle');
                 text.setAttribute('dominant-baseline', 'middle');
                 text.setAttribute('fill', 'white');
-                text.setAttribute('font-size', calculateFontSize(options[i].length)); // 动态调整字体大小
+                text.setAttribute('font-size', calculateFontSize(options[i].length));
                 text.textContent = options[i];
                 wheelSvg.appendChild(text);
             }
-            // 重置转盘角度
             lastAngle = 0;
-            wheelSvg.style.transition = 'none'; // 禁用过渡效果
+            wheelSvg.style.transition = 'none';
             wheelSvg.style.transform = 'rotate(0deg)';
         }
 
-        // 重置转盘
         function resetWheel() {
-            // 清空所有选项输入框
             const inputs = optionsContainer.querySelectorAll('input');
             inputs.forEach(input => (input.value = ''));
-            // 清空转盘
-            wheelSvg.innerHTML = '';
+            wheelSvg.innerHTML = '<circle cx="50" cy="50" r="40" fill="red" />'; // 重置为默认的红色圆形
             wheelSvg.style.transform = 'rotate(0deg)';
         }
 
-        // 动态计算字体大小
         function calculateFontSize(textLength) {
             if (textLength <= 5) return '10px';
             if (textLength <= 10) return '8px';
-            return '6px'; // 更长的文本使用更小的字体
+            return '6px';
         }
 
-        // 旋转转盘
         function spinWheel() {
             const paths = wheelSvg.querySelectorAll('path');
             if (paths.length === 0) {
                 alert('请先设置转盘');
                 return;
             }
-            // 直接基于 0 计算新的旋转角度
-            const randomAdditionalAngle = Math.floor(Math.random() * 360) + 1080; // 随机旋转角度
+            const randomAdditionalAngle = Math.floor(Math.random() * 360) + 1080;
             const newAngle = lastAngle + randomAdditionalAngle;
             wheelSvg.style.transition = 'transform 5s ease-out';
             wheelSvg.style.transform = `rotate(${newAngle}deg)`;
             lastAngle = newAngle;
         }
 
-        // 防止键盘弹出时页面滚动
         document.addEventListener('focusin', () => {
             document.body.style.overflow = 'hidden';
         });
