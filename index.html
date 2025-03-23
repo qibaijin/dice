@@ -28,7 +28,7 @@
             display: flex;
             flex-wrap: wrap; /* 允许换行 */
             justify-content: center;
-            max-width: 400px; /* 限制宽度，确保每行两个选项 */
+            max-width: 300px; /* 缩小宽度，适应手机屏幕 */
         }
 
         .option-row {
@@ -38,10 +38,22 @@
             margin-bottom: 10px; /* 行间距 */
         }
 
+        .option-item {
+            display: flex;
+            align-items: center;
+            width: 48%; /* 每行两个选项，留出间距 */
+        }
+
+        .option-label {
+            margin-right: 5px;
+            font-size: 14px;
+        }
+
         input[type="text"] {
-            padding: 10px;
-            margin: 5px;
-            width: 180px; /* 固定宽度，确保每行两个选项 */
+            padding: 8px;
+            margin: 5px 0;
+            width: 100%; /* 输入框占满剩余空间 */
+            box-sizing: border-box;
         }
 
         button {
@@ -114,10 +126,14 @@
                 row.className = 'option-row';
                 optionsContainer.appendChild(row);
             }
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.placeholder = `输入选项 ${inputs.length + 1}`;
-            optionsContainer.lastElementChild.appendChild(input);
+            const optionItem = document.createElement('div');
+            optionItem.className = 'option-item';
+            const optionNumber = inputs.length + 1;
+            optionItem.innerHTML = `
+                <span class="option-label">${optionNumber}</span>
+                <input type="text" placeholder="输入内容">
+            `;
+            optionsContainer.lastElementChild.appendChild(optionItem);
         }
 
         // 动态减少选项输入框
@@ -126,23 +142,23 @@
             if (rows.length === 0) return; // 没有选项时直接返回
 
             const lastRow = rows[rows.length - 1];
-            const inputs = lastRow.querySelectorAll('input');
-            if (inputs.length > 0) {
-                lastRow.removeChild(inputs[inputs.length - 1]); // 删除最后一个输入框
+            const optionItems = lastRow.querySelectorAll('.option-item');
+            if (optionItems.length > 0) {
+                lastRow.removeChild(optionItems[optionItems.length - 1]); // 删除最后一个选项
             }
-            if (inputs.length === 1) {
-                optionsContainer.removeChild(lastRow); // 如果行内没有输入框，删除整行
+            if (optionItems.length === 1) {
+                optionsContainer.removeChild(lastRow); // 如果行内没有选项，删除整行
             }
         }
 
         // 设置转盘
         function setupWheel() {
             wheelSvg.innerHTML = '';
-            const options = [];
             const inputs = optionsContainer.querySelectorAll('input');
-            inputs.forEach(input => {
+            const options = [];
+            inputs.forEach((input, index) => {
                 if (input.value) {
-                    options.push(input.value);
+                    options.push(`${index + 1}`);
                 }
             });
             if (options.length < 2) {
