@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>dice</title>
+    <title>自定义转盘</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -19,6 +19,12 @@
 
         #input-container {
             margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #options-container {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -61,20 +67,15 @@
             border-top: 20px solid red;
             z-index: 10;
         }
-
-        #result {
-            margin-top: 20px;
-            font-size: 24px;
-            font-weight: bold;
-        }
     </style>
 </head>
 
 <body>
     <div id="input-container">
-        <input type="text" id="option1" placeholder="输入选项 1">
-        <input type="text" id="option2" placeholder="输入选项 2">
-        <input type="text" id="option3" placeholder="输入选项 3">
+        <div id="options-container">
+            <!-- 动态生成的输入框会放在这里 -->
+        </div>
+        <button onclick="addOption()">增加选项</button>
         <button onclick="setupWheel()">设置/重置转盘</button>
         <button onclick="spinWheel()">开始转动</button>
     </div>
@@ -85,21 +86,30 @@
 
     <script>
         const wheelSvg = document.getElementById('wheel-svg');
-        const resultElement = document.getElementById('result');
-        const colors = ['#FF5733', '#33FF57', '#5733FF'];
+        const optionsContainer = document.getElementById('options-container');
+        const colors = ['#FF5733', '#33FF57', '#5733FF', '#33A1FF', '#FF33A1', '#A1FF33']; // 更多颜色
         let lastAngle = 0;
 
+        // 动态增加选项输入框
+        function addOption() {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.placeholder = `输入选项 ${optionsContainer.children.length + 1}`;
+            optionsContainer.appendChild(input);
+        }
+
+        // 设置转盘
         function setupWheel() {
             wheelSvg.innerHTML = '';
             const options = [];
-            for (let i = 1; i <= 3; i++) {
-                const option = document.getElementById(`option${i}`).value;
-                if (option) {
-                    options.push(option);
+            const inputs = optionsContainer.querySelectorAll('input');
+            inputs.forEach(input => {
+                if (input.value) {
+                    options.push(input.value);
                 }
-            }
-            if (options.length < 3) {
-                alert('请输入三个选项');
+            });
+            if (options.length < 2) {
+                alert('请输入至少两个选项');
                 return;
             }
             const angle = 360 / options.length;
@@ -110,7 +120,7 @@
                 const startY = 50 + 40 * Math.sin((startAngle - 90) * (Math.PI / 180));
                 const endX = 50 + 40 * Math.cos((endAngle - 90) * (Math.PI / 180));
                 const endY = 50 + 40 * Math.sin((endAngle - 90) * (Math.PI / 180));
-                const largeArcFlag = endAngle - startAngle > 180? 1 : 0;
+                const largeArcFlag = endAngle - startAngle > 180 ? 1 : 0;
                 const pathData = `M 50 50 L ${startX} ${startY} A 40 40 0 ${largeArcFlag} 1 ${endX} ${endY} Z`;
                 const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
                 path.setAttribute('d', pathData);
@@ -129,28 +139,25 @@
                 text.textContent = options[i];
                 wheelSvg.appendChild(text);
             }
+            // 重置转盘角度
             lastAngle = 0;
+            wheelSvg.style.transition = 'none'; // 禁用过渡效果
             wheelSvg.style.transform = 'rotate(0deg)';
         }
 
+        // 旋转转盘
         function spinWheel() {
             const paths = wheelSvg.querySelectorAll('path');
             if (paths.length === 0) {
                 alert('请先设置转盘');
                 return;
             }
-            const randomSeed = new Date().getTime();
-            const randomAdditionalAngle = Math.floor((randomSeed % 360) + Math.random() * 360) + 1080;
+            // 直接基于 0 计算新的旋转角度
+            const randomAdditionalAngle = Math.floor(Math.random() * 360) + 1080; // 随机旋转角度
             const newAngle = lastAngle + randomAdditionalAngle;
             wheelSvg.style.transition = 'transform 5s ease-out';
             wheelSvg.style.transform = `rotate(${newAngle}deg)`;
             lastAngle = newAngle;
-            setTimeout(() => {
-                const finalAngle = newAngle % 360;
-                const segmentIndex = Math.floor(finalAngle / (360 / paths.length));
-                const texts = wheelSvg.querySelectorAll('text');
-                wheelSvg.style.transition = 'none';
-            }, 5000);
         }
     </script>
 </body>
